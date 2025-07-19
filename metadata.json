@@ -1,0 +1,7 @@
+{
+  "uuid": "dualbattery@gnome",
+  "name": "Dual Battery Monitor",
+  "description": "Display the status of two batteries in panel bar",
+  "shell-version": ["46"],
+  "version": 1
+}
