@@ -4,5 +4,5 @@
   "description": "Display the status of two batteries in panel bar",
   "url": "https://github.com/remc0r/dualbattery-gnome",
   "shell-version": ["46"],
-  "version": 1
+  "version": 2
 }
