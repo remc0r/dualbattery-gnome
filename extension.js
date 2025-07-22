@@ -8,7 +8,21 @@ import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import Clutter from 'gi://Clutter';
 
-
+function getBatteryIconName(percent, isCharging) {
+    if (isCharging) {
+        if (percent < 10) return 'battery-level-10-charging-symbolic';
+        if (percent < 30) return 'battery-caution-charging-symbolic';
+        if (percent < 60) return 'battery-good-charging-symbolic';
+        if (percent < 90) return 'battery-level-90-charging-symbolic';
+        return 'battery-full-charging-symbolic';
+    } else {
+        if (percent < 10) return 'battery-level-10-symbolic';
+        if (percent < 30) return 'battery-caution-symbolic';
+        if (percent < 60) return 'battery-good-symbolic';
+        if (percent < 90) return 'battery-level-90-symbolic';
+        return 'battery-full-symbolic';
+    }
+}
 
 const Indicator = GObject.registerClass(
 class Indicator extends PanelMenu.Button {
@@ -49,6 +63,7 @@ class Indicator extends PanelMenu.Button {
         const devices = this._upower.get_devices();
         const batteries = devices.filter(d => d.kind === UPower.DeviceKind.BATTERY);
         const showName = this._settings ? this._settings.get_boolean('show-name') : true;
+        const showIcon = this._settings ? this._settings.get_boolean('show-icon') : true;
 
         // Get battery names (device.get_object_path() or device.get_property('model'))
         const batteryNames = batteries.map(b => {
@@ -67,37 +82,37 @@ class Indicator extends PanelMenu.Button {
             return;
         }
 
-        // Affiche les noms et pourcentages des batteries
+        // Calculate percentage for each battery
         const percentages = batteries.map(b => Math.round(b.percentage));
-        const labelParts = showName
-            ? batteries.map((b, i) => `${batteryNames[i]}: ${percentages[i]}%`)
-            : percentages.map(p => `${p}%`);
-        this._label.text = labelParts.join(' / ');
+        
 
-        // Ajoute une icône par niveau de batterie
-        // D'abord, retire les anciennes icônes (sauf le label)
+        //clean indicator
         this._indicator.remove_all_children();
         this._batteryIcons = [];
 
-        // Ajoute une icône pour chaque batterie
+        // browse through batteries and create icons/labels
         batteries.forEach((b, i) => {
-            let iconName = 'battery-full-symbolic';
             const percent = percentages[i];
-            if (percent < 10) iconName = 'battery-level-10-symbolic';
-            else if (percent < 30) iconName = 'battery-caution-symbolic';
-            else if (percent < 60) iconName = 'battery-good-symbolic';
-            else if (percent < 90) iconName = 'battery-level-90-symbolic';
 
-            const icon = new St.Icon({
-                icon_name: iconName,
-                style_class: 'system-status-icon',
+            if (showIcon) {
+                const iconName = getBatteryIconName(percent, b.state === UPower.DeviceState.CHARGING);
+
+                const icon = new St.Icon({
+                    icon_name: iconName,
+                    style_class: 'system-status-icon',
+                });
+                
+                this._indicator.add_child(icon);
+                this._batteryIcons.push(icon);
+            }
+            // Ajoute le pourcentage juste après l'icône
+            const percentLabel = new St.Label({
+                text: showName ? `${batteryNames[i]}: ${percent}%` : `${percent}%`,
+                y_align: Clutter.ActorAlign.CENTER,
+                style_class: 'panel-label',
             });
-            this._indicator.add_child(icon);
-            this._batteryIcons.push(icon);
+            this._indicator.add_child(percentLabel);
         });
-
-        // Ajoute le label à la fin
-        this._indicator.add_child(this._label);
     }
 
     destroy() {

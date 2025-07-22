@@ -26,9 +26,18 @@ export default class ExamplePreferences extends ExtensionPreferences {
         });
         group.add(row);
 
+        // Create a new preferences row
+        const row2 = new Adw.SwitchRow({
+            title: _('Show Battery Icons'),
+            subtitle: _('Whether to show the batteries icons'),
+        });
+        group.add(row2);
+
         // Create a settings object and bind the row to the `show-name` key
         window._settings = this.getSettings('org.gnome.shell.extensions.dualbattery');
         window._settings.bind('show-name', row, 'active',
+            Gio.SettingsBindFlags.DEFAULT);
+        window._settings.bind('show-icon', row2, 'active',
             Gio.SettingsBindFlags.DEFAULT);
     }
 }
