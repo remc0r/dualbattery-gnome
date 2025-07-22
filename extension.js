@@ -68,20 +68,36 @@ class Indicator extends PanelMenu.Button {
         }
 
         // Affiche les noms et pourcentages des batteries
-        
         const percentages = batteries.map(b => Math.round(b.percentage));
-        const labelParts = showName ? batteries.map((b, i) => `${batteryNames[i]}: ${percentages[i]}%`): percentages.map(p => `${p}%`);
+        const labelParts = showName
+            ? batteries.map((b, i) => `${batteryNames[i]}: ${percentages[i]}%`)
+            : percentages.map(p => `${p}%`);
         this._label.text = labelParts.join(' / ');
 
-        // Choisit le nom de l'icône selon la moyenne
-        const avg = percentages.reduce((a, b) => a + b, 0) / percentages.length;
-        let iconName = 'battery-full-symbolic';
-        if (avg < 10) iconName = 'battery-level-10-symbolic';
-        else if (avg < 30) iconName = 'battery-caution-symbolic';
-        else if (avg < 60) iconName = 'battery-good-symbolic';
-        else if (avg < 90) iconName = 'battery-level-90-symbolic';
+        // Ajoute une icône par niveau de batterie
+        // D'abord, retire les anciennes icônes (sauf le label)
+        this._indicator.remove_all_children();
+        this._batteryIcons = [];
 
-        this._icon.icon_name = iconName;
+        // Ajoute une icône pour chaque batterie
+        batteries.forEach((b, i) => {
+            let iconName = 'battery-full-symbolic';
+            const percent = percentages[i];
+            if (percent < 10) iconName = 'battery-level-10-symbolic';
+            else if (percent < 30) iconName = 'battery-caution-symbolic';
+            else if (percent < 60) iconName = 'battery-good-symbolic';
+            else if (percent < 90) iconName = 'battery-level-90-symbolic';
+
+            const icon = new St.Icon({
+                icon_name: iconName,
+                style_class: 'system-status-icon',
+            });
+            this._indicator.add_child(icon);
+            this._batteryIcons.push(icon);
+        });
+
+        // Ajoute le label à la fin
+        this._indicator.add_child(this._label);
     }
 
     destroy() {

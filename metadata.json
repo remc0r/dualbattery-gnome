@@ -1,5 +1,5 @@
 {
-  "uuid": "dualbattery@gnome",
+  "uuid": "dualbattery@gnome-local",
   "name": "Dual Battery Monitor",
   "description": "Display the status of two batteries in panel bar",
   "url": "https://github.com/remc0r/dualbattery-gnome",
