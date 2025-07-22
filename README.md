@@ -5,3 +5,8 @@ Dual Battery is a gnome 46 extension allowing to display multiple battery percen
 # Notes from author
 
 Work in progress
+
+add:
+    -labels
+    -icon
+    -preference
