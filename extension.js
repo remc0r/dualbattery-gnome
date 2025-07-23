@@ -9,27 +9,25 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import Clutter from 'gi://Clutter';
 
 function getBatteryIconName(percent, isCharging) {
-    if (isCharging) {
-        if (percent < 10) return 'battery-level-10-charging-symbolic';
-        if (percent < 30) return 'battery-caution-charging-symbolic';
-        if (percent < 60) return 'battery-good-charging-symbolic';
-        if (percent < 90) return 'battery-level-90-charging-symbolic';
-        return 'battery-full-charging-symbolic';
-    } else {
-        if (percent < 10) return 'battery-level-10-symbolic';
-        if (percent < 30) return 'battery-caution-symbolic';
-        if (percent < 60) return 'battery-good-symbolic';
-        if (percent < 90) return 'battery-level-90-symbolic';
-        return 'battery-full-symbolic';
-    }
+    
+    if (percent >= 90)
+        return (isCharging
+            ? 'battery-full-charging-symbolic'
+            : 'battery-full-symbolic');
+
+    const lvl = Math.floor(percent / 10) * 10;
+    return (isCharging
+        ? `battery-level-${lvl}-charging-symbolic`
+        : `battery-level-${lvl}-symbolic`);
+
 }
 
 const Indicator = GObject.registerClass(
 class Indicator extends PanelMenu.Button {
-    _init() {
+    _init(settings) {
         super._init(0.0, _('Battery Indicator'));
 
-        this._settings = this._settings || null;
+        this._settings = settings || null;
 
         this._upower = UPower.Client.new();
 
@@ -105,6 +103,7 @@ class Indicator extends PanelMenu.Button {
                 this._indicator.add_child(icon);
                 this._batteryIcons.push(icon);
             }
+            
             // Ajoute le pourcentage juste après l'icône
             const percentLabel = new St.Label({
                 text: showName ? `${batteryNames[i]}: ${percent}%` : `${percent}%`,
@@ -112,6 +111,16 @@ class Indicator extends PanelMenu.Button {
                 style_class: 'panel-label',
             });
             this._indicator.add_child(percentLabel);
+
+            // Ajoute un séparateur sauf après le dernier élément
+            if (i < batteries.length - 1) {
+                const sep = new St.Label({
+                    text: '  ',
+                    y_align: Clutter.ActorAlign.CENTER,
+                    style_class: 'panel-label',
+                });
+                this._indicator.add_child(sep);
+            }
         });
     }
 
@@ -127,7 +136,8 @@ class Indicator extends PanelMenu.Button {
 
 export default class DualBatteryExtension extends Extension {
     enable() {
-        this._indicator = new Indicator();
+        this._settings = this.getSettings();
+        this._indicator = new Indicator(this._settings);
 
         // Add the indicator to the panel
         Main.panel.addToStatusArea(this.uuid, this._indicator);
@@ -136,19 +146,11 @@ export default class DualBatteryExtension extends Extension {
         this._indicator.menu.addAction(_('Preferences'),
             () => this.openPreferences());
 
-        // setting to the "visible" property.
-        this._settings = this.getSettings();
-        
-        
         // Watch for changes to a specific setting
         this._settings.connect('changed', () => {
             this._indicator._update();
         });
-
-        this._indicator._settings = this._settings;
-
        
-        Main.panel.addToStatusArea(this.uuid, this._indicator);
     }
 
     disable() {

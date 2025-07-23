@@ -1,9 +1,9 @@
 {
-  "uuid": "dualbattery@gnome-local",
+  "uuid": "dualbattery@gnome",
   "name": "Dual Battery Monitor",
   "description": "Display the status of two batteries in panel bar",
   "url": "https://github.com/remc0r/dualbattery-gnome",
-  "shell-version": ["46"],
-  "version": 4,
+  "shell-version": ["45", "46", "47", "48"],
+  "version": 5,
   "settings-schema": "org.gnome.shell.extensions.dualbattery"
 }
