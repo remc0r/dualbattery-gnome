@@ -214,7 +214,7 @@ class Indicator extends PanelMenu.Button {
 
 export default class DualBatteryExtension extends Extension {
     enable() {
-        this._stylesheet = Gio.File.new_for_path(`${this.path}/stylesheet.css`);
+        //this._stylesheet = Gio.File.new_for_path(`${this.path}/stylesheet.css`);
         this._settings = this.getSettings();
         this._indicator = new Indicator(this._settings, this);
 
