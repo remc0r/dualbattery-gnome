@@ -1,5 +1,6 @@
 import Gio from 'gi://Gio';
 import Adw from 'gi://Adw';
+import Gtk from 'gi://Gtk';
 
 import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
@@ -33,11 +34,31 @@ export default class ExamplePreferences extends ExtensionPreferences {
         });
         group.add(row2);
 
-        // Create a settings object and bind the row to the `show-name` key
-        window._settings = this.getSettings('org.gnome.shell.extensions.dualbattery');
-        window._settings.bind('show-name', row, 'active',
+        // Create a new preferences row
+        const positionOptions = ['Far Left', 'Left', 'Center', 'Right', 'Far Right'];
+        const row3 = new Adw.ComboRow({
+            title: _('Position in panel'),
+            subtitle: _('Where to place this extension in the GNOME top panel'),
+            model: Gtk.StringList.new(positionOptions),
+        });
+        group.add(row3);
+
+        const settings = this.getSettings('org.gnome.shell.extensions.dualbattery');
+        settings.bind('show-name', row, 'active',
             Gio.SettingsBindFlags.DEFAULT);
-        window._settings.bind('show-icon', row2, 'active',
+        settings.bind('show-icon', row2, 'active',
             Gio.SettingsBindFlags.DEFAULT);
+
+        const updatePositionRow = () => {
+            const position = settings.get_string('position-in-panel');
+            const selected = positionOptions.indexOf(position);
+            row3.selected = selected >= 0 ? selected : positionOptions.indexOf('Right');
+        };
+
+        settings.connect('changed::position-in-panel', updatePositionRow);
+        row3.connect('notify::selected', () => {
+            settings.set_string('position-in-panel', positionOptions[row3.selected]);
+        });
+        updatePositionRow();
     }
 }

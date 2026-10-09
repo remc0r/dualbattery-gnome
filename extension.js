@@ -86,12 +86,58 @@ class Indicator extends PanelMenu.Button {
         
     }
 
+    _positionInPanel() {
+        let alignment = '';
+        let gravity = 0;
+
+        switch (this._settings.get_string('position-in-panel')) {
+            case 'Left': // left
+                alignment = 'left';
+                gravity = -1;
+                break;
+            case 'Center': // center
+                alignment = 'center';
+                gravity = -1;
+                break;
+            case 'Right': // right
+                alignment = 'right';
+                gravity = 0;
+                break;
+            case 'Far Left': // far left
+                alignment = 'left';
+                gravity = 0;
+                break;
+            case 'Far Right': // far right
+                alignment = 'right';
+                gravity = -1;
+                break;
+        }
+
+        return [alignment, gravity];
+    }
+
+    _positionInPanelChanged() {
+        this.container.get_parent().remove_child(this.container);
+        let position = this._positionInPanel();
+
+        // allows easily addressable boxes
+        let boxes = {
+            left: Main.panel._leftBox,
+            center: Main.panel._centerBox,
+            right: Main.panel._rightBox
+        };
+
+        // update position when changed from preferences
+        boxes[position[0]].insert_child_at_index(this.container, position[1]);
+    }
+
 
     async _update() {
         const devices = this._upower.get_devices();
         const batteries = devices.filter(d => d.kind === UPower.DeviceKind.BATTERY);
         const showName = this._settings ? this._settings.get_boolean('show-name') : true;
         const showIcon = this._settings ? this._settings.get_boolean('show-icon') : true;
+        this._positionInPanelChanged()
 
         if (this._batteryMenuItems) {
             this._batteryMenuItems.forEach(item => item.destroy());
@@ -197,6 +243,9 @@ class Indicator extends PanelMenu.Button {
                 });
                 this._indicator.add_child(sep);
             }
+
+            // Update position
+
         
         });
 
@@ -217,13 +266,15 @@ export default class DualBatteryExtension extends Extension {
         //this._stylesheet = Gio.File.new_for_path(`${this.path}/stylesheet.css`);
         this._settings = this.getSettings();
         this._indicator = new Indicator(this._settings, this);
+        this._position = this._indicator._positionInPanel();
 
         // Add the indicator to the panel
-        Main.panel.addToStatusArea(this.uuid, this._indicator);
+        Main.panel.addToStatusArea(this.uuid, this._indicator, this._position[1], this._position[0]);
          
         // Watch for changes to a specific setting
         this._settings.connect('changed', () => {
             this._indicator._update();
+
         });
        
     }
