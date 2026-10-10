@@ -272,14 +272,15 @@ export default class DualBatteryExtension extends Extension {
         Main.panel.addToStatusArea(this.uuid, this._indicator, this._position[1], this._position[0]);
          
         // Watch for changes to a specific setting
-        this._settings.connect('changed', () => {
+        this._settingsChangedId = this._settings.connect('changed', () => {
             this._indicator._update();
-
         });
        
     }
 
     disable() {
+        this._settings.disconnect(this._settingsChangedId);
+        this._settingsChangedId = null;
         this._indicator.destroy();
         this._indicator = null;
         this._settings = null;  
