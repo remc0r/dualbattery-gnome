@@ -117,7 +117,9 @@ class Indicator extends PanelMenu.Button {
     }
 
     _positionInPanelChanged() {
-        this.container.get_parent().remove_child(this.container);
+        const parent = this.container.get_parent();
+        if (parent)
+            parent.remove_child(this.container);
         let position = this._positionInPanel();
 
         // allows easily addressable boxes
@@ -137,7 +139,6 @@ class Indicator extends PanelMenu.Button {
         const batteries = devices.filter(d => d.kind === UPower.DeviceKind.BATTERY);
         const showName = this._settings ? this._settings.get_boolean('show-name') : true;
         const showIcon = this._settings ? this._settings.get_boolean('show-icon') : true;
-        this._positionInPanelChanged()
 
         if (this._batteryMenuItems) {
             this._batteryMenuItems.forEach(item => item.destroy());
@@ -272,8 +273,13 @@ export default class DualBatteryExtension extends Extension {
         Main.panel.addToStatusArea(this.uuid, this._indicator, this._position[1], this._position[0]);
          
         // Watch for changes to a specific setting
-        this._settingsChangedId = this._settings.connect('changed', () => {
-            this._indicator._update();
+        // Only move the indicator when the position setting itself changes,
+        // so extensions like Top Bar Organizer can keep their placement.
+        this._settingsChangedId = this._settings.connect('changed', (_settings, key) => {
+            if (key === 'position-in-panel')
+                this._indicator._positionInPanelChanged();
+            else
+                this._indicator._update();
         });
        
     }
