@@ -7,7 +7,7 @@
 <a href="https://extensions.gnome.org/extension/8342/dual-battery-monitor/"><img align="left" width="210" src="https://raw.githubusercontent.com/andyholmes/gnome-shell-extensions-badge/master/get-it-on-ego.svg" alt="Get it on GNOME Extensions"></a>
 
 **Display the charge of every battery of your laptop, side by side, in the GNOME top panel.**
-Built for laptops with two batteries (BAT0 / BAT1), compatible with GNOME Shell 45 through 50.
+Built for laptops with two batteries (BAT0 / BAT1), compatible with GNOME Shell 45 through 51.
 
 <br clear="left">
 

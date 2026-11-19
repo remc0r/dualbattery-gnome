@@ -176,7 +176,6 @@ class Indicator extends PanelMenu.Button {
 
             // Horizontal container for label and icon
             const labelIconBox = new St.BoxLayout({
-                vertical: false,
                 style_class: 'battery-label-icon-box',
                 y_expand: false,
                 height: 25, // optionnel, pour forcer la hauteur
@@ -216,13 +215,13 @@ class Indicator extends PanelMenu.Button {
             barContainer.add_child(barFill);
 
             // Add label icon and bar on the same line
-            const lineBox = new St.BoxLayout({ vertical: false, y_expand: false });
+            const lineBox = new St.BoxLayout({ y_expand: false });
             lineBox.add_child(labelIconBox);
             lineBox.add_child(barContainer);
 
             // Add line to the popup menu
             const row = new PopupMenu.PopupBaseMenuItem({ activate: false });
-            row.actor.add_child(lineBox);
+            row.add_child(lineBox);
 
             // Add row before the preferences row
             const items = this.menu._getMenuItems();
